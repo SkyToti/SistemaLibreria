@@ -1,0 +1,132 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "Mrbeelector" [level=1] [ref=e7]
+      - navigation [ref=e8]:
+        - link "Dashboard" [ref=e9] [cursor=pointer]:
+          - /url: /dashboard
+          - img [ref=e10]
+          - generic [ref=e15]: Dashboard
+        - link "Punto de Venta" [ref=e16] [cursor=pointer]:
+          - /url: /dashboard/pos
+          - img [ref=e17]
+          - generic [ref=e21]: Punto de Venta
+        - link "Historial de Ventas" [ref=e22] [cursor=pointer]:
+          - /url: /dashboard/reports
+          - img [ref=e23]
+          - generic [ref=e25]: Historial de Ventas
+        - link "Libros" [ref=e26] [cursor=pointer]:
+          - /url: /dashboard/books
+          - img [ref=e27]
+          - generic [ref=e29]: Libros
+        - link "Proveedores" [ref=e30] [cursor=pointer]:
+          - /url: /dashboard/suppliers
+          - img [ref=e31]
+          - generic [ref=e36]: Proveedores
+        - link "Gestión de Usuarios" [ref=e37] [cursor=pointer]:
+          - /url: /dashboard/users
+          - img [ref=e38]
+          - generic [ref=e41]: Gestión de Usuarios
+      - button "Cerrar Sesión" [ref=e44]:
+        - img [ref=e45]
+        - generic [ref=e48]: Cerrar Sesión
+    - main [ref=e49]:
+      - generic [ref=e51]:
+        - generic [ref=e53]:
+          - heading "Gestión de Usuarios" [level=2] [ref=e54]
+          - paragraph [ref=e55]: Administra el acceso y roles de tus empleados.
+        - generic [ref=e56]:
+          - generic [ref=e58]:
+            - generic [ref=e59]:
+              - heading "Nuevo Usuario" [level=3] [ref=e60]:
+                - img [ref=e61]
+                - text: Nuevo Usuario
+              - paragraph [ref=e64]: Crea una cuenta para un nuevo empleado.
+            - generic [ref=e66]:
+              - generic [ref=e67]:
+                - text: Nombre Completo
+                - generic [ref=e68]:
+                  - img [ref=e69]
+                  - textbox "Juan Pérez" [ref=e72]: Test User 1766856166891
+              - generic [ref=e73]:
+                - text: Correo Electrónico
+                - generic [ref=e74]:
+                  - img [ref=e75]
+                  - textbox "empleado@empresa.com" [ref=e78]: testuser1766856166891@example.com
+              - generic [ref=e79]:
+                - text: Contraseña
+                - textbox "••••••••" [ref=e80]: TestPassword123!
+              - generic [ref=e81]:
+                - text: Rol
+                - combobox [ref=e82]:
+                  - generic: Empleado (Vendedor)
+                  - img [ref=e83]
+                - combobox [ref=e85]
+              - button "Crear Usuario" [ref=e86]:
+                - img [ref=e87]
+                - text: Crear Usuario
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - heading "Usuarios del Sistema" [level=3] [ref=e93]
+              - paragraph [ref=e94]: Lista de todos los usuarios registrados y sus roles.
+            - generic [ref=e96]:
+              - generic [ref=e97]:
+                - generic [ref=e98]:
+                  - img [ref=e100]
+                  - generic [ref=e103]:
+                    - heading "Test User 1766856011386" [level=4] [ref=e104]
+                    - paragraph [ref=e105]: testuser1766856011386@example.com
+                - generic [ref=e106]:
+                  - generic [ref=e107]: Empleado
+                  - generic [ref=e108]: 12/27/2025
+              - generic [ref=e109]:
+                - generic [ref=e110]:
+                  - img [ref=e112]
+                  - generic [ref=e115]:
+                    - heading "Test User 1766855816084" [level=4] [ref=e116]
+                    - paragraph [ref=e117]: testuser1766855816084@example.com
+                - generic [ref=e118]:
+                  - generic [ref=e119]: Empleado
+                  - generic [ref=e120]: 12/27/2025
+              - generic [ref=e121]:
+                - generic [ref=e122]:
+                  - img [ref=e124]
+                  - generic [ref=e127]:
+                    - heading "Guadalupe" [level=4] [ref=e128]
+                    - paragraph [ref=e129]: anasevillalopez81@gmail.com
+                - generic [ref=e130]:
+                  - generic [ref=e131]: Empleado
+                  - generic [ref=e132]: 12/20/2025
+              - generic [ref=e133]:
+                - generic [ref=e134]:
+                  - img [ref=e136]
+                  - generic [ref=e139]:
+                    - heading "Isa" [level=4] [ref=e140]
+                    - paragraph [ref=e141]: 20243ds102@utez.edu.mx
+                - generic [ref=e142]:
+                  - generic [ref=e143]: Empleado
+                  - generic [ref=e144]: 12/20/2025
+              - generic [ref=e145]:
+                - generic [ref=e146]:
+                  - img [ref=e148]
+                  - generic [ref=e150]:
+                    - heading "Diego" [level=4] [ref=e151]
+                    - paragraph [ref=e152]: skytotifama123@gmail.com
+                - generic [ref=e153]:
+                  - generic [ref=e154]: Administrador
+                  - generic [ref=e155]: 12/17/2025
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e156]:
+        - img [ref=e158]
+        - generic [ref=e161]: Error inesperado al crear usuario
+      - listitem [ref=e162]:
+        - img [ref=e164]
+        - generic [ref=e167]: Usuario creado exitosamente
+  - button "Open Next.js Dev Tools" [ref=e173] [cursor=pointer]:
+    - img [ref=e174]
+  - alert [ref=e177]
+```
