@@ -17,7 +17,9 @@ Sistema de Punto de Venta (POS) moderno desarrollado con Next.js, Supabase y Tai
 - **Estado:** Zustand (con persistencia local).
 - **Validación:** Zod + React Hook Form.
 - **UI Components:** Shadcn/ui (Radix UI).
-- **Tests:** Vitest.
+- **Tests:** Vitest (Unit), Playwright (E2E).
+
+> **Última actualización:** Enero 2026 - E2E Tests implementados para Sales, Books, Suppliers.
 
 ## Configuración
 
