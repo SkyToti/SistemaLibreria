@@ -6,6 +6,7 @@ export interface GetBooksParams {
   limit?: number
   search?: string
   category?: string
+  stockFilter?: 'all' | 'low' | 'out'  // all = todos, low = stock ≤ 5, out = stock = 0
 }
 
 export interface PaginatedBooks {
@@ -16,7 +17,7 @@ export interface PaginatedBooks {
 export const bookService = {
   getAll: async (params: GetBooksParams = {}): Promise<PaginatedBooks> => {
     const supabase = createClient()
-    const { page = 1, limit = 50, search, category } = params
+    const { page = 1, limit = 50, search, category, stockFilter = 'all' } = params
     const from = (page - 1) * limit
     const to = from + limit - 1
 
@@ -32,6 +33,13 @@ export const bookService = {
 
     if (category && category !== 'all') {
       query = query.eq('category', category)
+    }
+
+    // Filtro de stock
+    if (stockFilter === 'low') {
+      query = query.lte('stock_quantity', 5).gt('stock_quantity', 0)
+    } else if (stockFilter === 'out') {
+      query = query.eq('stock_quantity', 0)
     }
 
     const { data, error, count } = await query

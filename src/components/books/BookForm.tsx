@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { BookFormData } from '@/lib/types/book'
+import { categoryService, Category } from '@/services/category.service'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,13 +15,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import {
   AlertDialog,
@@ -56,6 +50,9 @@ interface BookFormProps {
 
 export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing = false }: BookFormProps) {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false)
+  const [categoryInput, setCategoryInput] = useState('')
 
   const {
     register,
@@ -78,9 +75,12 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
     },
   })
 
-  // Actualizar formulario cuando initialData cambie (al abrir edición)
+  // Cargar categorías y actualizar formulario cuando se abra el modal
   useEffect(() => {
     if (open) {
+      // Cargar categorías desde Supabase
+      categoryService.getAll().then(setCategories).catch(console.error)
+
       if (initialData) {
         reset({
           title: initialData.title,
@@ -92,6 +92,7 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
           stock_quantity: initialData.stock_quantity,
           category: initialData.category,
         })
+        setCategoryInput(initialData.category || '')
       } else {
         reset({
           title: '',
@@ -103,14 +104,23 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
           stock_quantity: 0,
           category: '',
         })
+        setCategoryInput('')
       }
     }
   }, [initialData, open, reset])
 
   const onSubmitForm = async (data: BookSchema) => {
     await new Promise(resolve => setTimeout(resolve, 500))
+
+    // Si la categoría es nueva (no está en la lista), guardarla
+    const categoryExists = categories.some(c => c.name === data.category)
+    if (!categoryExists && data.category) {
+      await categoryService.create(data.category)
+    }
+
     onSubmit(data as BookFormData)
     reset()
+    setCategoryInput('')
     onOpenChange(false)
   }
 
@@ -250,24 +260,51 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
                 {errors.stock_quantity && <p className="text-xs text-red-400">{errors.stock_quantity.message}</p>}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 relative">
                 <Label htmlFor="category" className="text-zinc-400">Categoría</Label>
-                <Select
-                  value={watch('category')}
-                  onValueChange={(val) => setValue('category', val)}
-                >
-                  <SelectTrigger className="flat-input bg-zinc-900/50 border-zinc-800" data-testid="select-category">
-                    <SelectValue placeholder="Seleccionar..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
-                    <SelectItem value="Ficción">Ficción</SelectItem>
-                    <SelectItem value="No Ficción">No Ficción</SelectItem>
-                    <SelectItem value="Infantil">Infantil</SelectItem>
-                    <SelectItem value="Educativo">Educativo</SelectItem>
-                    <SelectItem value="Historia">Historia</SelectItem>
-                    <SelectItem value="Tecnología">Tecnología</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="relative">
+                  <Input
+                    id="category"
+                    placeholder="Selecciona o escribe nueva..."
+                    value={categoryInput}
+                    onChange={(e) => {
+                      setCategoryInput(e.target.value)
+                      setValue('category', e.target.value)
+                      setShowCategoryDropdown(true)
+                    }}
+                    onFocus={() => setShowCategoryDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                    className="flat-input bg-zinc-900/50 border-zinc-800"
+                    data-testid="input-category"
+                    autoComplete="off"
+                  />
+                  {showCategoryDropdown && categories.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg max-h-48 overflow-auto">
+                      {categories
+                        .filter(c => c.name.toLowerCase().includes(categoryInput.toLowerCase()))
+                        .map((category) => (
+                          <button
+                            key={category.id}
+                            type="button"
+                            className="w-full px-3 py-2 text-left text-sm text-zinc-300 hover:bg-zinc-800 transition-colors"
+                            onMouseDown={(e) => {
+                              e.preventDefault()
+                              setCategoryInput(category.name)
+                              setValue('category', category.name)
+                              setShowCategoryDropdown(false)
+                            }}
+                          >
+                            {category.name}
+                          </button>
+                        ))}
+                      {categoryInput && !categories.some(c => c.name.toLowerCase() === categoryInput.toLowerCase()) && (
+                        <div className="px-3 py-2 text-xs text-zinc-500 border-t border-zinc-800">
+                          + Crear "{categoryInput}" como nueva categoría
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {errors.category && <p className="text-xs text-red-400">{errors.category.message}</p>}
               </div>
             </div>

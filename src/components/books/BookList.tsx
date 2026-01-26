@@ -3,9 +3,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { Book, BookFormData } from '@/lib/types/book'
 import { bookService } from '@/services/book.service'
+import { categoryService, Category } from '@/services/category.service'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Plus, Filter, MoreHorizontal, Edit, Trash } from 'lucide-react'
+import { Search, Plus, Filter, MoreHorizontal, Edit, Trash, X } from 'lucide-react'
 import { useStaggeredEntrance } from '@/hooks/use-gsap-animations'
 import { BookForm } from './BookForm'
 import { toast } from 'sonner'
@@ -29,9 +30,21 @@ export function BookList() {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+
+  // Filtros
+  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
+  const [categories, setCategories] = useState<Category[]>([])
+
   const containerRef = useRef<HTMLDivElement>(null)
 
   useStaggeredEntrance(containerRef, '.book-row')
+
+  // Cargar categorías al montar
+  useEffect(() => {
+    categoryService.getAll().then(setCategories).catch(console.error)
+  }, [])
 
   const fetchBooks = async () => {
     setLoading(true)
@@ -39,7 +52,9 @@ export function BookList() {
       const { data, count } = await bookService.getAll({
         page,
         limit: 10,
-        search: searchTerm
+        search: searchTerm,
+        category: categoryFilter,
+        stockFilter: stockFilter
       })
       setBooks(data)
       setTotalPages(Math.ceil(count / 10))
@@ -56,12 +71,12 @@ export function BookList() {
       fetchBooks()
     }, 500)
     return () => clearTimeout(timeoutId)
-  }, [page, searchTerm])
+  }, [page, searchTerm, stockFilter, categoryFilter])
 
-  // Resetear página al buscar
+  // Resetear página al cambiar filtros
   useEffect(() => {
     setPage(1)
-  }, [searchTerm])
+  }, [searchTerm, stockFilter, categoryFilter])
 
   // Ya no filtramos en cliente
   const filteredBooks = books
@@ -131,9 +146,18 @@ export function BookList() {
           />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" className="rounded-xl border-white/10 hover:bg-zinc-800 text-zinc-300">
+          <Button
+            variant="outline"
+            className={`rounded-xl border-white/10 hover:bg-zinc-800 text-zinc-300 ${showFilters ? 'bg-zinc-800 border-indigo-500' : ''}`}
+            onClick={() => setShowFilters(!showFilters)}
+          >
             <Filter className="h-4 w-4 mr-2" />
             Filtros
+            {(stockFilter !== 'all' || categoryFilter !== 'all') && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs bg-indigo-600 rounded-full">
+                {(stockFilter !== 'all' ? 1 : 0) + (categoryFilter !== 'all' ? 1 : 0)}
+              </span>
+            )}
           </Button>
           <Button
             className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
@@ -145,6 +169,75 @@ export function BookList() {
           </Button>
         </div>
       </div>
+
+      {/* Panel de Filtros */}
+      {showFilters && (
+        <div className="bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-xl space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-zinc-300">Filtros activos</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-zinc-500 hover:text-zinc-300"
+              onClick={() => {
+                setStockFilter('all')
+                setCategoryFilter('all')
+              }}
+            >
+              <X className="h-3 w-3 mr-1" />
+              Limpiar
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Filtro de Stock */}
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-500 uppercase tracking-wider">Stock</label>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={stockFilter === 'all' ? 'default' : 'outline'}
+                  className={`rounded-lg text-xs ${stockFilter === 'all' ? 'bg-indigo-600' : 'border-zinc-700 text-zinc-400'}`}
+                  onClick={() => setStockFilter('all')}
+                >
+                  Todos
+                </Button>
+                <Button
+                  size="sm"
+                  variant={stockFilter === 'low' ? 'default' : 'outline'}
+                  className={`rounded-lg text-xs ${stockFilter === 'low' ? 'bg-yellow-600' : 'border-zinc-700 text-zinc-400'}`}
+                  onClick={() => setStockFilter('low')}
+                >
+                  Stock Bajo (≤5)
+                </Button>
+                <Button
+                  size="sm"
+                  variant={stockFilter === 'out' ? 'default' : 'outline'}
+                  className={`rounded-lg text-xs ${stockFilter === 'out' ? 'bg-red-600' : 'border-zinc-700 text-zinc-400'}`}
+                  onClick={() => setStockFilter('out')}
+                >
+                  Agotados
+                </Button>
+              </div>
+            </div>
+
+            {/* Filtro de Categoría */}
+            <div className="space-y-2">
+              <label className="text-xs text-zinc-500 uppercase tracking-wider">Categoría</label>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full px-3 py-2 bg-zinc-950/50 border border-zinc-700 rounded-lg text-sm text-zinc-300 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="all">Todas las categorías</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.name}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BookForm
         open={isFormOpen}
