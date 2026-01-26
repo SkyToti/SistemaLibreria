@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -22,6 +22,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 const bookSchema = z.object({
   title: z.string().min(2, 'El título debe tener al menos 2 caracteres'),
@@ -45,12 +55,14 @@ interface BookFormProps {
 }
 
 export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing = false }: BookFormProps) {
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     reset,
   } = useForm<BookSchema>({
     resolver: zodResolver(bookSchema) as any,
@@ -102,134 +114,175 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
     onOpenChange(false)
   }
 
+  // Interceptar cierre del modal
+  const handleDialogChange = (isOpen: boolean) => {
+    if (!isOpen && isDirty) {
+      // Si hay cambios sin guardar, mostrar confirmación
+      setShowDiscardDialog(true)
+    } else {
+      onOpenChange(isOpen)
+    }
+  }
+
+  // Confirmar descarte de cambios
+  const handleConfirmDiscard = () => {
+    setShowDiscardDialog(false)
+    reset()
+    onOpenChange(false)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] bg-zinc-950 border-zinc-800 text-zinc-100">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            {isEditing ? 'Editar Libro' : 'Nuevo Libro'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+        <AlertDialogContent className="bg-zinc-950 border-zinc-800 text-zinc-100">
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Descartar cambios?</AlertDialogTitle>
+            <AlertDialogDescription className="text-zinc-400">
+              Tienes cambios sin guardar. ¿Estás seguro de que quieres cerrar sin guardar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-white">
+              Seguir editando
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDiscard}
+              className="bg-red-600 hover:bg-red-700 text-white border-none"
+            >
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-        <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="title" className="text-zinc-400">Título</Label>
-              <Input
-                id="title"
-                placeholder="Ej. Cien Años de Soledad"
-                {...register('title')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-title"
-              />
-              {errors.title && <p className="text-xs text-red-400">{errors.title.message}</p>}
+      <Dialog open={open} onOpenChange={handleDialogChange}>
+        <DialogContent className="sm:max-w-[500px] bg-zinc-950 border-zinc-800 text-zinc-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">
+              {isEditing ? 'Editar Libro' : 'Nuevo Libro'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="title" className="text-zinc-400">Título</Label>
+                <Input
+                  id="title"
+                  placeholder="Ej. Cien Años de Soledad"
+                  {...register('title')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-title"
+                />
+                {errors.title && <p className="text-xs text-red-400">{errors.title.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="author" className="text-zinc-400">Autor</Label>
+                <Input
+                  id="author"
+                  placeholder="Ej. Gabriel García Márquez"
+                  {...register('author')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-author"
+                />
+                {errors.author && <p className="text-xs text-red-400">{errors.author.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="isbn" className="text-zinc-400">ISBN</Label>
+                <Input
+                  id="isbn"
+                  placeholder="978-..."
+                  {...register('isbn')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-isbn"
+                />
+                {errors.isbn && <p className="text-xs text-red-400">{errors.isbn.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="editorial" className="text-zinc-400">Editorial</Label>
+                <Input
+                  id="editorial"
+                  placeholder="Ej. Planeta, Alfaguara..."
+                  {...register('editorial')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-editorial"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="purchase_price" className="text-zinc-400">Precio Compra ($)</Label>
+                <Input
+                  id="purchase_price"
+                  type="number"
+                  step="0.01"
+                  {...register('purchase_price')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-purchase-price"
+                />
+                {errors.purchase_price && <p className="text-xs text-red-400">{errors.purchase_price.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sale_price" className="text-zinc-400">Precio Venta ($)</Label>
+                <Input
+                  id="sale_price"
+                  type="number"
+                  step="0.01"
+                  {...register('sale_price')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-sale-price"
+                />
+                {errors.sale_price && <p className="text-xs text-red-400">{errors.sale_price.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="stock_quantity" className="text-zinc-400">Stock</Label>
+                <Input
+                  id="stock_quantity"
+                  type="number"
+                  {...register('stock_quantity')}
+                  className="flat-input bg-zinc-900/50 border-zinc-800"
+                  data-testid="input-stock"
+                />
+                {errors.stock_quantity && <p className="text-xs text-red-400">{errors.stock_quantity.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-zinc-400">Categoría</Label>
+                <Select
+                  value={watch('category')}
+                  onValueChange={(val) => setValue('category', val)}
+                >
+                  <SelectTrigger className="flat-input bg-zinc-900/50 border-zinc-800" data-testid="select-category">
+                    <SelectValue placeholder="Seleccionar..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
+                    <SelectItem value="Ficción">Ficción</SelectItem>
+                    <SelectItem value="No Ficción">No Ficción</SelectItem>
+                    <SelectItem value="Infantil">Infantil</SelectItem>
+                    <SelectItem value="Educativo">Educativo</SelectItem>
+                    <SelectItem value="Historia">Historia</SelectItem>
+                    <SelectItem value="Tecnología">Tecnología</SelectItem>
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-xs text-red-400">{errors.category.message}</p>}
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="author" className="text-zinc-400">Autor</Label>
-              <Input
-                id="author"
-                placeholder="Ej. Gabriel García Márquez"
-                {...register('author')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-author"
-              />
-              {errors.author && <p className="text-xs text-red-400">{errors.author.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="isbn" className="text-zinc-400">ISBN</Label>
-              <Input
-                id="isbn"
-                placeholder="978-..."
-                {...register('isbn')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-isbn"
-              />
-              {errors.isbn && <p className="text-xs text-red-400">{errors.isbn.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="editorial" className="text-zinc-400">Editorial</Label>
-              <Input
-                id="editorial"
-                placeholder="Ej. Planeta, Alfaguara..."
-                {...register('editorial')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-editorial"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="purchase_price" className="text-zinc-400">Precio Compra ($)</Label>
-              <Input
-                id="purchase_price"
-                type="number"
-                step="0.01"
-                {...register('purchase_price')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-purchase-price"
-              />
-              {errors.purchase_price && <p className="text-xs text-red-400">{errors.purchase_price.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="sale_price" className="text-zinc-400">Precio Venta ($)</Label>
-              <Input
-                id="sale_price"
-                type="number"
-                step="0.01"
-                {...register('sale_price')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-sale-price"
-              />
-              {errors.sale_price && <p className="text-xs text-red-400">{errors.sale_price.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="stock_quantity" className="text-zinc-400">Stock</Label>
-              <Input
-                id="stock_quantity"
-                type="number"
-                {...register('stock_quantity')}
-                className="flat-input bg-zinc-900/50 border-zinc-800"
-                data-testid="input-stock"
-              />
-              {errors.stock_quantity && <p className="text-xs text-red-400">{errors.stock_quantity.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="category" className="text-zinc-400">Categoría</Label>
-              <Select
-                value={watch('category')}
-                onValueChange={(val) => setValue('category', val)}
-              >
-                <SelectTrigger className="flat-input bg-zinc-900/50 border-zinc-800" data-testid="select-category">
-                  <SelectValue placeholder="Seleccionar..." />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-zinc-300">
-                  <SelectItem value="Ficción">Ficción</SelectItem>
-                  <SelectItem value="No Ficción">No Ficción</SelectItem>
-                  <SelectItem value="Infantil">Infantil</SelectItem>
-                  <SelectItem value="Educativo">Educativo</SelectItem>
-                  <SelectItem value="Historia">Historia</SelectItem>
-                  <SelectItem value="Tecnología">Tecnología</SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.category && <p className="text-xs text-red-400">{errors.category.message}</p>}
-            </div>
-          </div>
-
-          <DialogFooter className="mt-6">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="hover:bg-zinc-800 text-zinc-400">
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-500 text-white" data-testid="submit-book-btn">
-              {isSubmitting ? 'Guardando...' : (isEditing ? 'Actualizar Libro' : 'Crear Libro')}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+            <DialogFooter className="mt-6">
+              <Button type="button" variant="ghost" onClick={() => handleDialogChange(false)} className="hover:bg-zinc-800 text-zinc-400">
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-500 text-white" data-testid="submit-book-btn">
+                {isSubmitting ? 'Guardando...' : (isEditing ? 'Actualizar Libro' : 'Crear Libro')}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
