@@ -193,6 +193,7 @@ export function BookList() {
               <div>
                 <h3 className="text-sm font-medium text-zinc-200 group-hover:text-white transition-colors">{book.title}</h3>
                 <p className="text-xs text-zinc-500">{book.author}</p>
+                {book.editorial && <p className="text-xs text-zinc-600">{book.editorial}</p>}
                 <p className="text-[10px] text-zinc-600 font-mono mt-0.5">{book.isbn}</p>
               </div>
             </div>

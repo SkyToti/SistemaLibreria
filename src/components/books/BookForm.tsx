@@ -26,6 +26,7 @@ import { Label } from '@/components/ui/label'
 const bookSchema = z.object({
   title: z.string().min(2, 'El título debe tener al menos 2 caracteres'),
   author: z.string().min(2, 'El autor debe tener al menos 2 caracteres'),
+  editorial: z.string().optional(),
   isbn: z.string().min(10, 'El ISBN debe ser válido'),
   purchase_price: z.coerce.number().min(0, 'El precio de compra no puede ser negativo'),
   sale_price: z.coerce.number().min(0.01, 'El precio de venta debe ser mayor a 0'),
@@ -56,6 +57,7 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
     defaultValues: {
       title: initialData?.title || '',
       author: initialData?.author || '',
+      editorial: initialData?.editorial || '',
       isbn: initialData?.isbn || '',
       purchase_price: initialData?.purchase_price || 0,
       sale_price: initialData?.sale_price || 0,
@@ -71,6 +73,7 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
         reset({
           title: initialData.title,
           author: initialData.author,
+          editorial: initialData.editorial || '',
           isbn: initialData.isbn,
           purchase_price: initialData.purchase_price,
           sale_price: initialData.sale_price,
@@ -81,6 +84,7 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
         reset({
           title: '',
           author: '',
+          editorial: '',
           isbn: '',
           purchase_price: 0,
           sale_price: 0,
@@ -143,6 +147,17 @@ export function BookForm({ open, onOpenChange, onSubmit, initialData, isEditing 
                 data-testid="input-isbn"
               />
               {errors.isbn && <p className="text-xs text-red-400">{errors.isbn.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editorial" className="text-zinc-400">Editorial</Label>
+              <Input
+                id="editorial"
+                placeholder="Ej. Planeta, Alfaguara..."
+                {...register('editorial')}
+                className="flat-input bg-zinc-900/50 border-zinc-800"
+                data-testid="input-editorial"
+              />
             </div>
 
             <div className="space-y-2">

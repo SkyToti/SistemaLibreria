@@ -51,59 +51,59 @@ export default function AddSupplierPage() {
 
       <Card className="p-8 flat-card">
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-white/80">Nombre de la Empresa *</Label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+              placeholder="Ej. Editorial Planeta"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white/80">Nombre de la Empresa *</Label>
+              <Label htmlFor="contact" className="text-white/80">Persona de Contacto</Label>
               <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-                placeholder="Ej. Editorial Planeta"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="contact" className="text-white/80">Persona de Contacto</Label>
-                <Input
-                  id="contact"
-                  value={formData.contact_person || ''}
-                  onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
-                  placeholder="Ej. Juan Pérez"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-white/80">Teléfono</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone || ''}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="Ej. 555-123-4567"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/80">Correo Electrónico</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email || ''}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="contacto@empresa.com"
+                id="contact"
+                value={formData.contact_person || ''}
+                onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+                placeholder="Ej. Juan Pérez"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address" className="text-white/80">Dirección</Label>
+              <Label htmlFor="phone" className="text-white/80">Teléfono</Label>
               <Input
-                id="address"
-                value={formData.address || ''}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Calle Principal #123, Ciudad"
+                id="phone"
+                value={formData.phone || ''}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="Ej. 555-123-4567"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white/80">Correo Electrónico</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email || ''}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="contacto@empresa.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address" className="text-white/80">Dirección</Label>
+            <Input
+              id="address"
+              value={formData.address || ''}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              placeholder="Calle Principal #123, Ciudad"
+            />
+          </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
             <Button variant="secondary" type="button" onClick={() => router.back()}>

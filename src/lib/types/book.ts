@@ -2,6 +2,7 @@ export interface Book {
   id: string
   title: string
   author: string
+  editorial?: string
   isbn: string
   category: string
   purchase_price: number
